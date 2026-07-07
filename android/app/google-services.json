@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1092849085425",
+    "project_id": "trama-a0971",
+    "storage_bucket": "trama-a0971.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1092849085425:android:ebe4c5de4805f726b6b250",
+        "android_client_info": {
+          "package_name": "com.example.trama_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1092849085425-i22iertrev5g3q8ju3lgdb5s1u3fafhj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC9wk0-mdm7JZQkiGrJDdMu9hrPBGbLT8E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1092849085425-i22iertrev5g3q8ju3lgdb5s1u3fafhj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
