@@ -71,7 +71,6 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
 
-              // Card de Moedas e Cupons
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(

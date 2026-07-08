@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:google_sign_in/google_sign_in.dart';
 import 'main_navigator.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -13,48 +13,59 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _initializeGoogleSignIn();
+  }
+
+  Future<void> _initializeGoogleSignIn() async {
+    // Inicialização obrigatória para a v7.0+
+    await GoogleSignIn.instance.initialize();
+  }
+
   Future<void> _signInWithGoogle() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      if (kIsWeb) {
-        GoogleAuthProvider authProvider = GoogleAuthProvider();
-        UserCredential userCredential = await FirebaseAuth.instance.signInWithPopup(authProvider);
+      // ERRO 1 e 2 RESOLVIDOS: Usamos apenas authenticate() e ele mesmo já nos devolve o usuário.
+      final googleUser = await GoogleSignIn.instance.authenticate();
 
-        final nomeUsuario = userCredential.user?.displayName ?? 'Leitor';
-        
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Bem-vindo ao Trama, $nomeUsuario!'),
-              backgroundColor: const Color(0xFF8B5A2B),
-            ),
-          );
+      if (googleUser == null) {
+        setState(() => _isLoading = false);
+        return; 
+      }
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const MainNavigator()),
-          );
-        }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Apresentação otimizada para Web. Teste no navegador!'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        }
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // ERRO 3 RESOLVIDO: O accessToken não existe mais aqui na v7.0+. 
+      // O Firebase funciona perfeitamente apenas passando o idToken.
+      final credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final nomeUsuario = userCredential.user?.displayName ?? 'Leitor';
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Bem-vindo ao Trama, $nomeUsuario!'),
+            backgroundColor: const Color(0xFF8B5A2B),
+          ),
+        );
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainNavigator()),
+        );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Erro ao fazer login. Verifique o pop-up.'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Erro no login nativo: $e'), backgroundColor: Colors.red),
         );
       }
     } finally {
@@ -92,7 +103,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(fontSize: 16, color: Color(0xFF555555)),
               ),
               const Spacer(),
-              
               _isLoading 
                 ? const Center(child: CircularProgressIndicator(color: Color(0xFF8B5A2B)))
                 : ElevatedButton.icon(
